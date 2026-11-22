@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PharmaPOS Central Admin - D. Hossain</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary: #1d4ed8;
+      --primary-dark: #0f172a;
+      --primary-light: #eff6ff;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --green: #10b981;
+      --orange: #f59e0b;
+      --red: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    input {
+      -webkit-user-select: text !important;
+      user-select: text !important;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* KEYFRAME ANIMATIONS */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes shakeError {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    @keyframes pulseHint {
+      0% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.45); }
+      70% { box-shadow: 0 0 0 8px rgba(29, 78, 216, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0); }
+    }
+
+    /* ADMIN LOGIN GATE */
+    #admin-login-gate {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top right, #1e40af 0%, #0f172a 65%, #020617 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 9999;
+    }
+
+    .login-box {
+      background: rgba(255, 255, 255, 0.98);
+      width: 100%;
+      max-width: 420px;
+      border-radius: 26px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .login-box.shake {
+      animation: shakeError 0.38s ease;
+    }
+
+    .login-icon {
+      width: 68px;
+      height: 68px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      color: var(--primary);
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      box-shadow: 0 8px 20px rgba(29, 78, 216, 0.15);
+    }
+
+    .login-box h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .login-box p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      text-align: left;
+      margin-bottom: 14px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .input-field-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-field-wrap i.field-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 13px 44px 13px 40px;
+      border: 1.5px solid var(--border);
+      border-radius: 13px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      background: #f8fafc;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-group input:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.1);
+    }
+
+    /* HINT ICON BUTTON BESIDE PASSWORD */
+    .hint-trigger-btn {
+      position: absolute;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: #e2e8f0;
+      color: #94a3b8;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: not-allowed;
+      transition: all 0.25s ease;
+    }
+
+    .hint-trigger-btn.unlocked {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: #93c5fd;
+      cursor: pointer;
+      animation: pulseHint 1.6s infinite;
+    }
+
+    .hint-trigger-btn.unlocked:hover {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .hint-banner {
+      display: none;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 10px 12px;
+      border-radius: 11px;
+      margin-bottom: 12px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      animation: fadeSlideUp 0.25s ease;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      border: none;
+      border-radius: 13px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 10px 20px -5px rgba(29, 78, 216, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn-login:hover {
+      box-shadow: 0 14px 24px -5px rgba(29, 78, 216, 0.45);
+    }
+
+    .btn-login:active {
+      transform: scale(0.98);
+    }
+
+    .login-err {
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 9px 12px;
+      border-radius: 10px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .login-brand-foot {
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* MAIN DASHBOARD */
+    #admin-dashboard {
+      display: none;
+      width: 100%;
+      min-height: 100vh;
+      padding-bottom: 60px;
+      animation: fadeSlideUp 0.4s ease;
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+      padding: 14px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.15);
+    }
+
+    .topbar-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-badge-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(96, 165, 250, 0.35);
+      color: #60a5fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .topbar-left h1 {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .topbar-left span {
+      font-size: 11px;
+      color: #94a3b8;
+      display: block;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-top {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 8px 13px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .btn-top:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-top.danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* KPI STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    .stat-info span {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .stat-info strong {
+      display: block;
+      font-size: 24px;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .stat-card.pending strong { color: var(--orange); }
+    .stat-card.pending .stat-icon { background: #fef3c7; color: #d97706; }
+
+    .stat-card.approved strong { color: var(--green); }
+    .stat-card.approved .stat-icon { background: #dcfce7; color: #059669; }
+
+    .stat-card.total strong { color: var(--primary); }
+    .stat-card.total .stat-icon { background: #dbeafe; color: #1d4ed8; }
+
+    /* SEARCH & FILTER */
+    .controls-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+      background: var(--card);
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-wrap i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: 11px 14px 11px 40px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      background: #f8fafc;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-wrap input:focus {
+      background: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .filter-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .f-tab {
+      padding: 8px 15px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .f-tab:hover {
+      border-color: #cbd5e1;
+      color: var(--text);
+    }
+
+    .f-tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 10px rgba(29, 78, 216, 0.25);
+    }
+
+    /* STORE CARDS GRID */
+    .store-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .store-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      animation: fadeSlideUp 0.35s ease backwards;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .store-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.07);
+    }
+
+    .store-card.is-pending { border-left: 5px solid var(--orange); }
+    .store-card.is-approved { border-left: 5px solid var(--green); }
+    .store-card.is-suspended { border-left: 5px solid var(--red); }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .store-id-tag {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 7px;
+      margin-bottom: 5px;
+      letter-spacing: 0.4px;
+    }
+
+    .card-header h3 {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .status-pill {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      flex-shrink: 0;
+    }
+
+    .st-pending { background: #fef3c7; color: #92400e; }
+    .st-approved { background: #dcfce7; color: #166534; }
+    .st-suspended { background: #fee2e2; color: #991b1b; }
+
+    .card-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #334155;
+    }
+
+    .detail-item span {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .pin-reveal {
+      font-family: monospace;
+      background: #f1f5f9;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-weight: 800;
+      color: #0f172a;
+      font-size: 13px;
+    }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .act-btn {
+      flex: 1;
+      min-width: 96px;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 11px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .act-btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-suspend { background: #fef3c7; color: #b45309; }
+    .btn-wa { background: #dcfce7; color: #15803d; }
+    .btn-del { background: #fee2e2; color: #dc2626; max-width: 42px; min-width: 42px; }
+
+    .footer-credit {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 32px;
+    }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #fff;
+      padding: 11px 20px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 600;
+      display: none;
+      z-index: 10000;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    /* DESKTOP & TABLET RESPONSIVE ENHANCEMENTS */
+    @media (min-width: 768px) {
+      .topbar { padding: 16px 28px; }
+      .topbar-left h1 { font-size: 19px; }
+      .container { padding: 24px 28px; }
+
+      .stats-grid { gap: 18px; }
+      .stat-card { padding: 20px 22px; }
+      .stat-icon { display: flex; }
+      .stat-info strong { font-size: 28px; }
+
+      .controls-bar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 18px;
+      }
+
+      .store-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+      }
+    }
+
+    @media (min-width: 1100px) {
+      .store-list {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MASTER ADMIN LOGIN GATE -->
+  <div id="admin-login-gate">
+    <div class="login-box" id="login-card-box">
+      <div class="login-icon"><i class="fa-solid fa-user-shield"></i></div>
+      <h2>Central License Admin</h2>
+      <p>PharmaPOS Pro • Master Control Panel</p>
+
+      <div class="input-group">
+        <label>Admin Mobile Number</label>
+        <div class="input-field-wrap">
+          <i class="fa-solid fa-phone field-icon"></i>
+          <input type="tel" id="master-phone" maxlength="14" placeholder="Enter Admin Mobile (+91 optional)" autocomplete="tel" />
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Master Access Password</label>
+        <div class="input-field-wrap">
+          <i class="fa-solid fa-key field-icon"></i>
+          <input type="password" id="master-pass" placeholder="Enter 6-Digit Password" onkeydown="if(event.key==='Enter') verifyMasterAdmin()" />
+          <button type="button" id="hint-icon-btn" class="hint-trigger-btn" onclick="handleHintClick()" title="Hint locked (Available after 10 wrong attempts)">
+            <i class="fa-solid fa-question"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="hint-banner" id="password-hint-box">
+        <i class="fa-solid fa-lightbulb"></i>
+        <span>Hint: First six digit of UID</span>
+      </div>
+
+      <button type="button" class="btn-login" onclick="verifyMasterAdmin()">
+        <i class="fa-solid fa-lock-open"></i> Unlock Control Panel
+      </button>
+
+      <div class="login-err" id="login-err"></div>
+
+      <div class="login-brand-foot">
+        Designed & Developed by <strong>D. Hossain</strong> • ঘুম হীন স্বপ্ন
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN ADMIN DASHBOARD -->
+  <div id="admin-dashboard">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="topbar-left">
+          <div class="topbar-badge-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <div>
+            <h1>PharmaPOS Central Admin</h1>
+            <span>Live License Authority • D. Hossain</span>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-top" onclick="changeMasterPass()" title="Change Admin Password">
+            <i class="fa-solid fa-key"></i> <span>Password</span>
+          </button>
+          <button class="btn-top danger" onclick="logoutMasterAdmin()" title="Logout">
+            <i class="fa-solid fa-right-from-bracket"></i> <span>Exit</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <!-- KPI CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card pending">
+          <div class="stat-info">
+            <span>Pending</span>
+            <strong id="stat-pending">0</strong>
+          </div>
+          <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+        </div>
+        <div class="stat-card approved">
+          <div class="stat-info">
+            <span>Active / Approved</span>
+            <strong id="stat-approved">0</strong>
+          </div>
+          <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+        </div>
+        <div class="stat-card total">
+          <div class="stat-info">
+            <span>Total Stores</span>
+            <strong id="stat-total">0</strong>
+          </div>
+          <div class="stat-icon"><i class="fa-solid fa-store"></i></div>
+        </div>
+      </div>
+
+      <!-- SEARCH & FILTERS -->
+      <div class="controls-bar">
+        <div class="search-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="search-input" placeholder="Search Store ID, Name, Owner or Phone..." oninput="renderStores()" />
+        </div>
+        <div class="filter-tabs">
+          <button class="f-tab active" onclick="setFilter('all', this)">All Requests</button>
+          <button class="f-tab" onclick="setFilter('pending', this)">Pending Approval</button>
+          <button class="f-tab" onclick="setFilter('approved', this)">Approved</button>
+          <button class="f-tab" onclick="setFilter('suspended', this)">Suspended</button>
+        </div>
+      </div>
+
+      <!-- LIVE STORE REQUESTS LIST -->
+      <div class="store-list" id="store-list-container">
+        <p style="text-align:center; color:#64748b; padding:30px; grid-column: 1 / -1;">Connecting to Firebase Central Server...</p>
+      </div>
+
+      <div class="footer-credit">
+        Designed & Developed by <strong>D. Hossain</strong> • ঘুম হীন স্বপ্ন
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const MASTER_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyA5nFNlBoeSjYp7OA7IeObWuuStfTLhKiA",
+      authDomain: "pharmacy-pos-84203.firebaseapp.com",
+      projectId: "pharmacy-pos-84203",
+      storageBucket: "pharmacy-pos-84203.firebasestorage.app",
+      messagingSenderId: "1082478795452",
+      appId: "1:1082478795452:web:2ed69b5b55cbe2e2454eb9"
+    };
+
+    const app = initializeApp(MASTER_FIREBASE_CONFIG);
+    const db = getFirestore(app);
+
+    const ALLOWED_ADMIN_PHONES = ["8798705561", "6909998882"];
+    const DEFAULT_MASTER_PASS = "523749";
+    const PASS_STORAGE_KEY = "ghs_central_admin_pass_v2";
+    const WRONG_ATTEMPTS_KEY = "ghs_central_admin_wrong_attempts";
+    const SESSION_KEY = "ghs_central_admin_unlocked";
+
+    let allStores = [];
+    let currentFilter = "all";
+
+    function getMasterPassword() {
+      return localStorage.getItem(PASS_STORAGE_KEY) || DEFAULT_MASTER_PASS;
+    }
+
+    function getWrongAttemptsCount() {
+      return parseInt(localStorage.getItem(WRONG_ATTEMPTS_KEY) || "0", 10);
+    }
+
+    function normalizeIndianMobile(rawInput) {
+      const digitsOnly = (rawInput || "").replace(/\D/g, "");
+      if (digitsOnly.length === 12 && digitsOnly.startsWith("91")) {
+        return digitsOnly.slice(2);
+      }
+      if (digitsOnly.length === 11 && digitsOnly.startsWith("0")) {
+        return digitsOnly.slice(1);
+      }
+      return digitsOnly;
+    }
+
+    function syncHintButtonState() {
+      const attempts = getWrongAttemptsCount();
+      const hintBtn = document.getElementById("hint-icon-btn");
+      if (!hintBtn) return;
+
+      if (attempts >= 10) {
+        hintBtn.classList.add("unlocked");
+        hintBtn.title = "Click to view Password Hint";
+      } else {
+        hintBtn.classList.remove("unlocked");
+        hintBtn.title = `Hint unlocks after 10 wrong attempts (${attempts}/10)`;
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.innerText = msg;
+      t.style.display = "block";
+      clearTimeout(window._t);
+      window._t = setTimeout(() => t.style.display = "none", 2600);
+    }
+
+    // Initialize hint button state on load
+    syncHintButtonState();
+
+    // Check existing session
+    if (sessionStorage.getItem(SESSION_KEY) === "true") {
+      unlockDashboard();
+    }
+
+    window.handleHintClick = function() {
+      const attempts = getWrongAttemptsCount();
+      if (attempts < 10) {
+        showToast(`Hint is locked! Unlocks after 10 failed attempts (${attempts}/10).`);
+        return;
+      }
+      const hintBox = document.getElementById("password-hint-box");
+      hintBox.style.display = hintBox.style.display === "flex" ? "none" : "flex";
+    };
+
+    window.verifyMasterAdmin = function() {
+      const rawPhone = document.getElementById("master-phone").value.trim();
+      const normalizedPhone = normalizeIndianMobile(rawPhone);
+      const pass = document.getElementById("master-pass").value.trim();
+      const err = document.getElementById("login-err");
+      const cardBox = document.getElementById("login-card-box");
+
+      const isPhoneValid = ALLOWED_ADMIN_PHONES.includes(normalizedPhone);
+      const isPassValid = pass === getMasterPassword();
+
+      if (isPhoneValid && isPassValid) {
+        localStorage.setItem(WRONG_ATTEMPTS_KEY, "0");
+        sessionStorage.setItem(SESSION_KEY, "true");
+        err.style.display = "none";
+        unlockDashboard();
+      } else {
+        let attempts = getWrongAttemptsCount() + 1;
+        localStorage.setItem(WRONG_ATTEMPTS_KEY, String(attempts));
+        syncHintButtonState();
+
+        cardBox.classList.remove("shake");
+        void cardBox.offsetWidth;
+        cardBox.classList.add("shake");
+
+        err.style.display = "block";
+        if (!isPhoneValid) {
+          err.innerText = "Unauthorized Admin Mobile Number!";
+        } else if (attempts >= 10) {
+          err.innerText = `Incorrect Password! (${attempts} failed attempts — Click '?' icon for Hint)`;
+        } else {
+          err.innerText = `Incorrect Password! (Attempt ${attempts}/10)`;
+        }
+      }
+    };
+
+    window.logoutMasterAdmin = function() {
+      sessionStorage.removeItem(SESSION_KEY);
+      location.reload();
+    };
+
+    window.changeMasterPass = function() {
+      const newPass = prompt("Enter new Master Admin Password (min 4 characters):");
+      if (newPass && newPass.trim().length >= 4) {
+        localStorage.setItem(PASS_STORAGE_KEY, newPass.trim());
+        showToast("Master Admin password updated!");
+      }
+    };
+
+    function unlockDashboard() {
+      document.getElementById("admin-login-gate").style.display = "none";
+      document.getElementById("admin-dashboard").style.display = "block";
+      listenToStoreRequests();
+    }
+
+    function listenToStoreRequests() {
+      const colRef = collection(db, "license_requests");
+      onSnapshot(colRef, (snapshot) => {
+        allStores = [];
+        snapshot.forEach((docSnap) => {
+          allStores.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        allStores.sort((a, b) => {
+          if (a.status === "pending" && b.status !== "pending") return -1;
+          if (a.status !== "pending" && b.status === "pending") return 1;
+          return (b.requestedAt || "").localeCompare(a.requestedAt || "");
+        });
+
+        updateStats();
+        renderStores();
+      }, (error) => {
+        console.error("Firestore read error:", error);
+        document.getElementById("store-list-container").innerHTML = `
+          <div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:14px; font-size:13px; grid-column: 1 / -1;">
+            <strong>Firestore Permission Error!</strong><br/>
+            Please enable Cloud Firestore in your Firebase Console and set security rules to allow read/write on <code>license_requests</code>.
+          </div>
+        `;
+      });
+    }
+
+    function updateStats() {
+      const pending = allStores.filter(s => s.status === "pending").length;
+      const approved = allStores.filter(s => s.status === "approved").length;
+      document.getElementById("stat-pending").innerText = pending;
+      document.getElementById("stat-approved").innerText = approved;
+      document.getElementById("stat-total").innerText = allStores.length;
+    }
+
+    window.setFilter = function(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll(".f-tab").forEach(el => el.classList.remove("active"));
+      btn.classList.add("active");
+      renderStores();
+    };
+
+    window.renderStores = function() {
+      const container = document.getElementById("store-list-container");
+      const q = (document.getElementById("search-input").value || "").toLowerCase();
+
+      const filtered = allStores.filter(s => {
+        const matchFilter = currentFilter === "all" || s.status === currentFilter;
+        const matchQuery =
+          (s.profileId || "").toLowerCase().includes(q) ||
+          (s.bizName || "").toLowerCase().includes(q) ||
+          (s.ownerName || "").toLowerCase().includes(q) ||
+          (s.phone || "").includes(q);
+        return matchFilter && matchQuery;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:#64748b; padding:30px; grid-column: 1 / -1;">No store records found.</p>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map((s, index) => {
+        const status = s.status || "pending";
+        const cardClass = status === "approved" ? "is-approved" : (status === "suspended" ? "is-suspended" : "is-pending");
+        const pillClass = status === "approved" ? "st-approved" : (status === "suspended" ? "st-suspended" : "st-pending");
+        const reqDate = s.requestedAt ? new Date(s.requestedAt).toLocaleString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : 'N/A';
+
+        const waMsg = encodeURIComponent(
+          `Hello ${s.ownerName},\nYour *PharmaPOS Pro* license for *${s.bizName}* (Store ID: *${s.profileId}*) has been *APPROVED*! You can now use your terminal.\n\n- D. Hossain (ঘুম হীন স্বপ্ন)`
+        );
+
+        return `
+          <div class="store-card ${cardClass}" style="animation-delay: ${Math.min(index * 0.05, 0.4)}s;">
+            <div>
+              <div class="card-header">
+                <div>
+                  <span class="store-id-tag">${s.profileId}</span>
+                  <h3>${s.bizName || 'Unnamed Pharmacy'}</h3>
+                </div>
+                <span class="status-pill ${pillClass}">${status}</span>
+              </div>
+
+              <div class="card-details">
+                <div class="detail-item">
+                  <span>Owner Name</span>
+                  <strong>${s.ownerName || '-'}</strong>
+                </div>
+                <div class="detail-item">
+                  <span>Mobile / WhatsApp</span>
+                  <strong>${s.phone || '-'}</strong>
+                </div>
+                <div class="detail-item">
+                  <span>Location</span>
+                  <strong>${s.city || ''}, ${s.district || ''} (${s.pin || ''})</strong>
+                </div>
+                <div class="detail-item">
+                  <span>Admin 6-Digit PIN</span>
+                  <span class="pin-reveal">${s.adminPin || 'Not Set'}</span>
+                </div>
+                <div class="detail-item">
+                  <span>GST / Drug Lic.</span>
+                  <strong>${s.gst || 'N/A'} | ${s.dlNo || 'N/A'}</strong>
+                </div>
+                <div class="detail-item">
+                  <span>Registered On</span>
+                  <strong>${reqDate}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              ${status !== 'approved' ? `
+                <button class="act-btn btn-approve" onclick="updateStoreStatus('${s.id}', 'approved')">
+                  <i class="fa-solid fa-circle-check"></i> Approve
+                </button>
+              ` : `
+                <button class="act-btn btn-suspend" onclick="updateStoreStatus('${s.id}', 'suspended')">
+                  <i class="fa-solid fa-ban"></i> Suspend
+                </button>
+              `}
+              <a href="https://wa.me/91${s.whatsapp || s.phone}?text=${waMsg}" target="_blank" class="act-btn btn-wa">
+                <i class="fa-brands fa-whatsapp"></i> Notify
+              </a>
+              <button class="act-btn btn-del" onclick="deleteStoreRecord('${s.id}', '${(s.bizName || '').replace(/'/g, "\\'")}')" title="Delete Record">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    };
+
+    window.updateStoreStatus = async function(storeId, newStatus) {
+      try {
+        await updateDoc(doc(db, "license_requests", storeId), {
+          status: newStatus,
+          updatedAt: new Date().toISOString()
+        });
+        showToast(`Store ${storeId} marked as ${newStatus.toUpperCase()}!`);
+      } catch (err) {
+        alert("Failed to update status: " + err.message);
+      }
+    };
+
+    window.deleteStoreRecord = async function(storeId, bizName) {
+      if (!confirm(`Permanently delete license record for "${bizName}" (${storeId})?`)) return;
+      try {
+        await deleteDoc(doc(db, "license_requests", storeId));
+        showToast("Store record deleted!");
+      } catch (err) {
+        alert("Delete failed: " + err.message);
+      }
+    };
+  </script>
+</body>
+</html>
