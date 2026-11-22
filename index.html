@@ -42,7 +42,6 @@
       overflow-x: hidden;
     }
 
-    /* KEYFRAME ANIMATIONS */
     @keyframes fadeSlideUp {
       from {
         opacity: 0;
@@ -169,7 +168,6 @@
       box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.1);
     }
 
-    /* HINT ICON BUTTON BESIDE PASSWORD */
     .hint-trigger-btn {
       position: absolute;
       right: 10px;
@@ -652,7 +650,6 @@
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
     }
 
-    /* DESKTOP & TABLET RESPONSIVE ENHANCEMENTS */
     @media (min-width: 768px) {
       .topbar { padding: 16px 28px; }
       .topbar-left h1 { font-size: 19px; }
@@ -823,7 +820,7 @@
     const DEFAULT_MASTER_PASS = "523749";
     const PASS_STORAGE_KEY = "ghs_central_admin_pass_v2";
     const WRONG_ATTEMPTS_KEY = "ghs_central_admin_wrong_attempts";
-    const SESSION_KEY = "ghs_central_admin_unlocked";
+    const PERSISTENT_LOGIN_KEY = "ghs_central_admin_persistent_auth";
 
     let allStores = [];
     let currentFilter = "all";
@@ -869,11 +866,10 @@
       window._t = setTimeout(() => t.style.display = "none", 2600);
     }
 
-    // Initialize hint button state on load
     syncHintButtonState();
 
-    // Check existing session
-    if (sessionStorage.getItem(SESSION_KEY) === "true") {
+    // Persistent login check via localStorage
+    if (localStorage.getItem(PERSISTENT_LOGIN_KEY) === "true") {
       unlockDashboard();
     }
 
@@ -899,7 +895,7 @@
 
       if (isPhoneValid && isPassValid) {
         localStorage.setItem(WRONG_ATTEMPTS_KEY, "0");
-        sessionStorage.setItem(SESSION_KEY, "true");
+        localStorage.setItem(PERSISTENT_LOGIN_KEY, "true");
         err.style.display = "none";
         unlockDashboard();
       } else {
@@ -923,7 +919,8 @@
     };
 
     window.logoutMasterAdmin = function() {
-      sessionStorage.removeItem(SESSION_KEY);
+      if (!confirm("Do you want to lock & logout from the Admin Panel?")) return;
+      localStorage.removeItem(PERSISTENT_LOGIN_KEY);
       location.reload();
     };
 
